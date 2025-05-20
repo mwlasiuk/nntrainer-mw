@@ -99,7 +99,8 @@ void __ggml_q4_0_8x8_q8_0_GEMM(const unsigned int M, const unsigned int N,
     ::quantize_row_q8_0(A, QA.data(), K);
 
 #pragma omp parallel for num_threads(n_threads)
-    for (unsigned int thread_idx = 0; thread_idx < n_threads; ++thread_idx) {
+    for (int thread_idx = 0; thread_idx < static_cast<int>(n_threads);
+         ++thread_idx) {
       unsigned int M_step_start = (thread_idx * N) / n_threads;     // = 0
       unsigned int M_step_end = ((thread_idx + 1) * N) / n_threads; // ne01 = N
 
@@ -124,7 +125,7 @@ void __ggml_q4_0_8x8_q8_0_GEMM(const unsigned int M, const unsigned int N,
     /// @note Heuristic inspection conducted that applying multithreading on
     /// run-time quantization hurts model latency
     // #pragma omp parallel for collapse(1) num_threads(16)
-    for (unsigned int i = 0; i < M4; i++) {
+    for (int i = 0; i < static_cast<int>(M4); i++) {
       ::ggml_quantize_mat_q8_0_4x8(A + 4 * i * K,
                                    QA.data() + i * qa_4_rows_size, K);
     }
@@ -169,7 +170,8 @@ void __ggml_q4_K_8x8_q8_K_GEMM(const unsigned int M, const unsigned int N,
     ::quantize_row_q8_K(A, QA.data(), K);
 
 #pragma omp parallel for num_threads(n_threads)
-    for (unsigned int thread_idx = 0; thread_idx < n_threads; ++thread_idx) {
+    for (int thread_idx = 0; thread_idx < static_cast<int>(n_threads);
+         ++thread_idx) {
       unsigned int M_step_start = (thread_idx * N) / n_threads;     // = 0
       unsigned int M_step_end = ((thread_idx + 1) * N) / n_threads; // ne01 = N
 
@@ -196,13 +198,13 @@ void __ggml_q4_K_8x8_q8_K_GEMM(const unsigned int M, const unsigned int N,
     /// @note Heuristic inspection conducted that applying multithreading on
     /// run-time quantization hurts model latency
     // #pragma omp parallel for collapse(1) num_threads(16)
-    for (unsigned int i = 0; i < M4; i++) {
+    for (int i = 0; i < static_cast<int>(M4); i++) {
       ::ggml_quantize_mat_q8_K_4x8(A + 4 * i * K,
                                    QA.data() + i * qa_4_rows_size, K);
     }
 
 #pragma omp parallel for collapse(1) num_threads(thread_num)
-    for (unsigned int i = 0; i < thread_num; i++) {
+    for (int i = 0; i < static_cast<int>(thread_num); i++) {
       unsigned int src0_start = (i * N) / thread_num;
       unsigned int src0_end = ((i + 1) * N) / thread_num;
 
